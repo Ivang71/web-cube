@@ -51,7 +51,7 @@
             height: 100%;
             position: absolute;
             backface-visibility: inherit;
-            font-size: 3rem;
+            font-size: 2rem;
             color: #fff;
         }
         .front {
@@ -120,11 +120,15 @@
 
             rotationAngle += (rotationSpeed * deltaTime) % 360
             
-            offsetX = Math.sin(normalizedTime * bounceSpeed) * 40 + 100
-            offsetY = Math.cos(normalizedTime * bounceSpeed) * 20 + 120
+            offsetX = Math.sin(normalizedTime * bounceSpeed) * 20
+            offsetY = Math.cos(normalizedTime * bounceSpeed) * 19
 
 
-            videoElement.style.transform = `translateX(${offsetX}px) translateY(calc(-30% + ${offsetY}px)) rotate3d(0.7, 0.3, 0.4, ${rotationAngle}deg)`;
+            videoElement.style.transform = `
+                translateX(calc(var(--side-distance-from-center)/2 + ${offsetX}px))
+                translateY(calc(var(--side-distance-from-center)/2 + ${offsetY}px))
+                rotate3d(0.7, 0.3, 0.4, ${rotationAngle}deg)
+            `;
 
             requestAnimationFrame(animate)
         }
@@ -144,13 +148,33 @@
 
         elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`
 
-        const dragStart = (e) => {
+        addEventListener('touchstart', (e) => {
+            isDragging = true
+            previousX = e.touches[0].clientX
+            previousY = e.touches[0].clientY
+        })
+        addEventListener('touchmove', (e) => {
+            if (!isDragging) return
+
+            const deltaX = e.touches[0].clientX - previousX
+            const deltaY = e.touches[0].clientY - previousY
+            previousX = e.touches[0].clientX
+            previousY = e.touches[0].clientY
+
+            rotationY += deltaX * 0.5 // Adjust sensitivity for Y axis rotation
+            rotationX += deltaY * 0.5 // Adjust sensitivity for X axis rotation
+
+            elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`;
+        })
+        addEventListener('touchend', isDragging = false)
+
+
+        addEventListener('mousedown', (e) => {
             isDragging = true
             previousX = e.clientX
             previousY = e.clientY
-        }
-
-        const drag = (e) => {
+        })
+        addEventListener('mousemove', (e) => {
             if (!isDragging) return
 
             const deltaX = e.clientX - previousX
@@ -162,16 +186,8 @@
             rotationX += deltaY * 0.5 // Adjust sensitivity for X axis rotation
 
             elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`
-        }
-
-        const dragEnd = () => isDragging = false
-
-        addEventListener('touchstart', dragStart)
-        addEventListener('mousedown', dragStart)
-        addEventListener('touchmove', drag)
-        addEventListener('mousemove', drag)
-        addEventListener('touchend', dragEnd)
-        addEventListener('mouseup', dragEnd)
+        })
+        addEventListener('mouseup', () => isDragging = false)
 
       </script>
 </body>
