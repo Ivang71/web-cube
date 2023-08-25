@@ -167,7 +167,7 @@
 
             elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`;
         })
-        addEventListener('touchend', isDragging = false)
+        addEventListener('touchend', () => isDragging = false)
 
 
         addEventListener('mousedown', (e) => {
