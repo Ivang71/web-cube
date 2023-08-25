@@ -11,6 +11,7 @@
             --cube-side-length: min(40vh, 40vw);
             --side-distance-from-center: calc((var(--cube-side-length)/2));
             user-select: none;
+            font-family: sans-serif;
         }
         html, body, .content {
             margin: 0;
@@ -21,7 +22,7 @@
         .content {
             position: relative;
         }
-        #default-example {
+        #wrapper {
             background: linear-gradient(skyblue,khaki);
             perspective: calc(var(--cube-side-length) * 3);
         }
@@ -34,13 +35,13 @@
             height: 100%;
             text-align: center;
         }
-        #example-element {
+        #cube {
             width: var(--cube-side-length);
             height: var(--cube-side-length);
             transform-style: preserve-3d;
         }
         .transition-all {
-            transition: all .3s ease-in;
+            /* transition: all .1s ease-in; */
         }
         .face {
             display: flex;
@@ -77,20 +78,101 @@
             background: rgba(210,0,210,.7);
             transform: rotateX(-90deg) translateZ(var(--side-distance-from-center));
         }
+        #video {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            height: 50%;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
     <div class="content">
-        <section id="default-example" class="default-example">
-          <div id="example-element" class="transition-all" style="transform: rotate3d(1, 1, 1, 45deg);">
-            <div class="face front">1</div>
-            <div class="face back">2</div>
-            <div class="face right">3</div>
-            <div class="face left">4</div>
-            <div class="face top">5</div>
-            <div class="face bottom">6</div>
+        <section id="wrapper" class="wrapper">
+          <div id="cube" class="transition-all">
+            <div class="face front">front</div>
+            <div class="face back">back</div>
+            <div class="face right">right</div>
+            <div class="face left">left</div>
+            <div class="face top">top</div>
+            <div class="face bottom">bottom</div>
+            <iframe id="video" src="https://www.youtube.com/embed/PtkqwslbLY8?si=OdbDwXlzFMg3oio7" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </section>
       </div>
+
+      <script>
+        // video rotation
+        const videoElement = document.querySelector('#video')
+
+        const rotationSpeed = 0.08, bounceSpeed = 0.001
+
+        let lastFrameTime = performance.now(), currentTime, deltaTime, rotationAngle = 30, normalizedTime = 0
+
+        function animate() {
+            currentTime = performance.now()
+            deltaTime = currentTime - lastFrameTime 
+            lastFrameTime = currentTime
+
+            normalizedTime += deltaTime
+
+            rotationAngle += (rotationSpeed * deltaTime) % 360
+            
+            offsetX = Math.sin(normalizedTime * bounceSpeed) * 40 + 100
+            offsetY = Math.cos(normalizedTime * bounceSpeed) * 20 + 120
+
+
+            videoElement.style.transform = `translateX(${offsetX}px) translateY(calc(-30% + ${offsetY}px)) rotate3d(0.7, 0.3, 0.4, ${rotationAngle}deg)`;
+
+            requestAnimationFrame(animate)
+        }
+
+        animate()
+
+
+
+        // cube interactions
+        const elem = document.querySelector('#cube')
+        
+        let isDragging = false
+        let previousX = 0
+        let previousY = 0
+        let rotationX = 30
+        let rotationY = -40
+
+        elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`
+
+        const dragStart = (e) => {
+            isDragging = true
+            previousX = e.clientX
+            previousY = e.clientY
+        }
+
+        const drag = (e) => {
+            if (!isDragging) return
+
+            const deltaX = e.clientX - previousX
+            const deltaY = e.clientY - previousY
+            previousX = e.clientX
+            previousY = e.clientY
+
+            rotationY += deltaX * 0.5 // Adjust sensitivity for Y axis rotation
+            rotationX += deltaY * 0.5 // Adjust sensitivity for X axis rotation
+
+            elem.style.transform = `rotate3d(1, 0, 0, ${-rotationX}deg) rotate3d(0, 1, 0, ${rotationY}deg)`
+        }
+
+        const dragEnd = () => isDragging = false
+
+        addEventListener('touchstart', dragStart)
+        addEventListener('mousedown', dragStart)
+        addEventListener('touchmove', drag)
+        addEventListener('mousemove', drag)
+        addEventListener('touchend', dragEnd)
+        addEventListener('mouseup', dragEnd)
+
+      </script>
 </body>
 </html>
